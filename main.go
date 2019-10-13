@@ -5,17 +5,7 @@ import (
 )
 
 func main() {
-	grid := `
-	. . . . . . . .
-	. . . . . . . .
-	. . . . . . . .
-	. . . X O . . .
-	. . . O X . . .
-	. . . . . . . .
-	. . . . . . . .
-	. . . . . . . .
-	`
-	board := mustParseGrid(grid)
-
-	fmt.Println(board)
+	s := InitialState()
+	fmt.Println(s)
+	fmt.Println("utility for X is", s.Utility('X'))
 }
