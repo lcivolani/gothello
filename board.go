@@ -13,9 +13,11 @@ type Board struct {
 	matrix [size][size]rune
 }
 
-func (b Board) Cell(i, j int) rune {
-	// no need to check i and j: the runtime will do it for us, and panic if necessary
-	return b.matrix[i][j]
+func (b Board) Cell(i, j int) (rune, bool) {
+	if checkCoord(i, j) != nil {
+		return 0, false
+	}
+	return b.matrix[i][j], true
 }
 
 func (b Board) SetCell(i, j int, mark rune) (Board, error) {
@@ -60,14 +62,21 @@ func (b Board) Count(mark rune) int {
 func (b Board) String() string {
 	buf := bytes.Buffer{}
 	for i := 0; i < size; i++ {
+		if i == 0 {
+			fmt.Fprint(&buf, " ")
+			for j := 0; j < size; j++ {
+				fmt.Fprintf(&buf, " %d", j)
+			}
+			fmt.Fprint(&buf, "\n")
+		}
 		for j := 0; j < size; j++ {
-			if j > 0 {
-				fmt.Fprint(&buf, " ")
+			if j == 0 {
+				fmt.Fprintf(&buf, "%d", i)
 			}
 			if b.matrix[i][j] == 0 {
-				fmt.Fprint(&buf, ".")
+				fmt.Fprint(&buf, " .")
 			} else {
-				fmt.Fprintf(&buf, "%c", b.matrix[i][j])
+				fmt.Fprintf(&buf, " %c", b.matrix[i][j])
 			}
 		}
 		fmt.Fprint(&buf, "\n")

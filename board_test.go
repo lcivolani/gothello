@@ -36,7 +36,7 @@ func TestCell(t *testing.T) {
 	}
 	for _, test := range tests {
 		descr := fmt.Sprintf("testBoard.Cell(%d, %d)", test.row, test.col)
-		got := testBoard.Cell(test.row, test.col)
+		got, _ := testBoard.Cell(test.row, test.col)
 		if got != test.want {
 			t.Errorf("%s = %q, want %q", descr, got, test.want)
 		}
