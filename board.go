@@ -13,25 +13,25 @@ type Board struct {
 	matrix [size][size]rune
 }
 
-func (b Board) Cell(i, j int) (rune, bool) {
+func (b *Board) Cell(i, j int) (rune, bool) {
 	if checkCoord(i, j) != nil {
 		return 0, false
 	}
 	return b.matrix[i][j], true
 }
 
-func (b Board) SetCell(i, j int, mark rune) (Board, error) {
+func (b *Board) SetCell(i, j int, mark rune) error {
 	if err := checkCoord(i, j); err != nil {
-		return b, fmt.Errorf("cannot set cell (%d, %d): %v", i, j, err)
+		return fmt.Errorf("cannot set cell (%d, %d): %v", i, j, err)
 	}
 	if b.matrix[i][j] != 0 {
-		return b, fmt.Errorf("cannot set cell (%d, %d): cell is full", i, j)
+		return fmt.Errorf("cannot set cell (%d, %d): cell is full", i, j)
 	}
 	b.matrix[i][j] = mark
-	return b, nil
+	return nil
 }
 
-func (b Board) Flip(i, j int) Board {
+func (b *Board) Flip(i, j int) {
 	switch b.matrix[i][j] {
 	case 'X':
 		b.matrix[i][j] = 'O'
@@ -41,12 +41,11 @@ func (b Board) Flip(i, j int) Board {
 		// only the program can flip cells: an error here must be due to a bug
 		panic("attempt to flip an empty cell")
 	}
-	return b
 }
 
-func (b Board) Count(mark rune) int {
+func (b *Board) Count(mark rune) int {
 	if mark != 'X' && mark != 'O' && mark != 0 {
-		panic(fmt.Sprintf("unknown mark %q", mark))
+		panic(fmt.Sprintf("cannot count: unknown mark %q", mark))
 	}
 	count := 0
 	for i := 0; i < size; i++ {
@@ -59,7 +58,12 @@ func (b Board) Count(mark rune) int {
 	return count
 }
 
-func (b Board) String() string {
+func (b *Board) Copy() *Board {
+	copy := *b
+	return &copy
+}
+
+func (b *Board) String() string {
 	buf := bytes.Buffer{}
 	for i := 0; i < size; i++ {
 		if i == 0 {
@@ -94,7 +98,7 @@ func checkCoord(i, j int) error {
 	return nil
 }
 
-func parseGrid(grid string) (Board, error) {
+func parseGrid(grid string) (*Board, error) {
 	chars := make([]rune, 0, size*size)
 	for _, c := range grid {
 		if strings.ContainsRune("XO.", c) {
@@ -102,7 +106,7 @@ func parseGrid(grid string) (Board, error) {
 		}
 	}
 	if len(chars) != size*size {
-		return Board{}, errors.New("parsing failed: malformed grid")
+		return nil, errors.New("parsing failed: malformed grid")
 	}
 	var matrix [size][size]rune
 	for i, c := range chars {
@@ -113,10 +117,10 @@ func parseGrid(grid string) (Board, error) {
 		col := i % size
 		matrix[row][col] = c
 	}
-	return Board{matrix}, nil
+	return &Board{matrix}, nil
 }
 
-func mustParseGrid(grid string) Board {
+func mustParseGrid(grid string) *Board {
 	b, err := parseGrid(grid)
 	if err != nil {
 		panic(err)

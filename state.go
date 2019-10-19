@@ -13,7 +13,7 @@ func init() {
 
 // State represents a stage of an Othello gameplay.
 type State struct {
-	board  Board
+	board  *Board
 	toMove rune
 	steps  int
 }
@@ -22,6 +22,7 @@ type State struct {
 func InitialState() State {
 	s := State{}
 	mid := size / 2
+	s.board = new(Board)
 	s.board.matrix[mid-1][mid-1] = 'X'
 	s.board.matrix[mid-1][mid] = 'O'
 	s.board.matrix[mid][mid-1] = 'O'
@@ -85,7 +86,8 @@ func (s State) Result(a Action) (State, error) {
 	if a.mark != s.toMove {
 		return s, fmt.Errorf("not %c's turn", a.mark)
 	}
-	nb, err := s.board.SetCell(a.row, a.col, a.mark)
+	nb := s.board.Copy()
+	err := nb.SetCell(a.row, a.col, a.mark)
 	if err != nil {
 		return s, fmt.Errorf("invalid action %s: %v", a, err)
 	}

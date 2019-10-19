@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-var testBoard Board
+var testBoard *Board
 
 func init() {
 	grid := `
