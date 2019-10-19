@@ -14,36 +14,32 @@ func init() {
 // State represents a stage of an Othello gameplay.
 type State struct {
 	board  *Board
-	toMove rune
+	player rune
 	steps  int
 }
 
 // InitialState specifies how the game is set up at the starting point.
-func InitialState() State {
-	s := State{}
-	mid := size / 2
+func InitialState() *State {
+	s := new(State)
 	s.board = new(Board)
+	mid := size / 2
 	s.board.matrix[mid-1][mid-1] = 'X'
 	s.board.matrix[mid-1][mid] = 'O'
 	s.board.matrix[mid][mid-1] = 'O'
 	s.board.matrix[mid][mid] = 'X'
-	if rand.Intn(2) == 0 {
-		s.toMove = 'X'
-	} else {
-		s.toMove = 'O'
-	}
+	s.player = randomPlayer()
 	return s
 }
 
 // Player defines which player has the move in a state.
 // It returns the corresponding mark.
-func (s State) Player() rune {
-	return s.toMove
+func (s *State) Player() rune {
+	return s.player
 }
 
 // Opponent defines which player is playing against the current one.
 // It returns the corresponding mark.
-func (s State) Opponent() rune {
+func (s *State) Opponent() rune {
 	if s.Player() == 'X' {
 		return 'O'
 	}
@@ -51,14 +47,14 @@ func (s State) Opponent() rune {
 }
 
 // Actions returns the set of legal moves in a state.
-func (s State) Actions() []Action {
+func (s *State) Actions() []Action {
 	// TODO: possible duplicates!
 	acts := make([]Action, 0)
 	for i := 0; i < size; i++ {
 		for j := 0; j < size; j++ {
 			// this operation cannot fail
 			cell, _ := s.board.Cell(i, j)
-			if cell != s.toMove {
+			if cell != s.player {
 				continue
 			}
 			for _, dir := range directions {
@@ -75,19 +71,19 @@ func (s State) Actions() []Action {
 				if !ok || ncell != 0 {
 					continue
 				}
-				acts = append(acts, Action{s.toMove, ni, nj})
+				acts = append(acts, Action{s.player, ni, nj})
 			}
 		}
 	}
 	return acts
 }
 
-func (s State) Result(a Action) (State, error) {
-	if a.mark != s.toMove {
+func (s *State) Result(a Action) (*State, error) {
+	if a.mark != s.player {
 		return s, fmt.Errorf("not %c's turn", a.mark)
 	}
-	nb := s.board.Copy()
-	err := nb.SetCell(a.row, a.col, a.mark)
+	res := s.Copy()
+	err := res.board.SetCell(a.row, a.col, a.mark)
 	if err != nil {
 		return s, fmt.Errorf("invalid action %s: %v", a, err)
 	}
@@ -103,29 +99,44 @@ func (s State) Result(a Action) (State, error) {
 			ni, nj = dir.Next(ni, nj)
 			ncell, ok = s.board.Cell(ni, nj)
 		}
-		if !ok || ncell != s.toMove {
+		if !ok || ncell != s.player {
 			continue
 		}
-		// TODO: flip opponent's pieces
+		// TODO: flip opponent's pieces (on result Board)
 	}
-	s.board = nb
-	s.toMove = s.Opponent()
-	s.steps++
-	return s, nil
+	// TODO: if move didn't capture, it is illegal: return error
+	res.player = s.Opponent()
+	res.steps++
+	return res, nil
 }
 
 // Utility defines the final numeric value for a game that ends in the terminal
 // state s, for a given player.
 // It panics if called on a non-terminal state.
-func (s State) Utility(mark rune) int {
+func (s *State) Utility(mark rune) int {
 	// TODO: make sure that the state is terminal
 	return s.board.Count(mark)
 }
 
-func (s State) String() string {
+func (s *State) Copy() *State {
+	copy := new(State)
+	copy.board = s.board.Copy()
+	copy.player = s.player
+	copy.steps = s.steps
+	return copy
+}
+
+func (s *State) String() string {
 	buf := bytes.Buffer{}
 	fmt.Fprint(&buf, s.board)
-	fmt.Fprintf(&buf, "next player: %c\n", s.toMove)
-	fmt.Fprintf(&buf, "total moves: %d\n", s.steps)
+	fmt.Fprintf(&buf, "next player: %c\n", s.player)
+	fmt.Fprintf(&buf, "steps: %d\n", s.steps)
 	return buf.String()
+}
+
+func randomPlayer() rune {
+	if rand.Intn(2) == 0 {
+		return 'X'
+	}
+	return 'O'
 }
