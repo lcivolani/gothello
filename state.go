@@ -121,11 +121,20 @@ func (s *State) Result(a Action) (*State, error) {
 	return res, nil
 }
 
+func (s *State) Terminal() bool {
+	// TODO: incorrect: state is terminal if *both* players cannot play
+	return s.board.Count('X')+s.board.Count('O') == size*size ||
+		len(s.Actions()) == 0
+}
+
 // Utility defines the final numeric value for a game that ends in the terminal
 // state s, for a given player.
 // It panics if called on a non-terminal state.
 func (s *State) Utility(mark rune) int {
-	// TODO: make sure that the state is terminal
+	if !s.Terminal() {
+		panic("cannot compute utility: state is not terminal")
+	}
+	// TODO: by convention, empty squares at the end are added to the winner's score
 	return s.board.Count(mark)
 }
 

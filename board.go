@@ -25,7 +25,7 @@ func (b *Board) SetCell(i, j int, mark rune) error {
 		return fmt.Errorf("cannot set cell (%d, %d): %v", i, j, err)
 	}
 	if b.matrix[i][j] != 0 {
-		return fmt.Errorf("cannot set cell (%d, %d): cell is full", i, j)
+		return fmt.Errorf("cannot set cell (%d, %d): cell occupied", i, j)
 	}
 	b.matrix[i][j] = mark
 	return nil
