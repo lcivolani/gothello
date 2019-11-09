@@ -1,8 +1,8 @@
 package main
 
 func main() {
-	p1 := &HumanPlayer{"Aldo"}
-	p2 := &HumanPlayer{"Ugo"}
+	p1 := &RandomPlayer{"Aldo"}
+	p2 := &RandomPlayer{"Ugo"}
 	g := NewGame(p1, p2)
 	g.Play()
 }
