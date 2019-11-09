@@ -80,13 +80,17 @@ func (s *State) Actions() []Action {
 
 func (s *State) Result(a Action) (*State, error) {
 	if a.mark != s.player {
-		return s, fmt.Errorf("not %c's turn", a.mark)
+		return s, fmt.Errorf("invalid action %s: not %c's turn", a, a.mark)
 	}
 	res := s.Copy()
 	err := res.board.SetCell(a.row, a.col, a.mark)
 	if err != nil {
 		return s, fmt.Errorf("invalid action %s: %v", a, err)
 	}
+	res.player = s.Opponent()
+	res.steps++
+
+	captured := 0
 	for _, dir := range directions {
 		ni, nj := dir.Next(a.row, a.col)
 		ncell, ok := s.board.Cell(ni, nj)
@@ -102,11 +106,18 @@ func (s *State) Result(a Action) (*State, error) {
 		if !ok || ncell != s.player {
 			continue
 		}
-		// TODO: flip opponent's pieces (on result Board)
+		// flip opponent's pieces (on result Board)
+		ci, cj := dir.Next(a.row, a.col)
+		for c := 0; c < count; c++ {
+			res.board.Flip(ci, cj)
+			ci, cj = dir.Next(ci, cj)
+		}
+		captured += count
 	}
-	// TODO: if move didn't capture, it is illegal: return error
-	res.player = s.Opponent()
-	res.steps++
+	if captured == 0 {
+		return s, fmt.Errorf("invalid action %s: no capture", a)
+	}
+	fmt.Println("captured", captured, "pieces")
 	return res, nil
 }
 

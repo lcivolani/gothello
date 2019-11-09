@@ -8,7 +8,7 @@ func (d *Direction) Next(x, y int) (int, int) {
 	return x + d.dx, y + d.dy
 }
 
-// TODO: the order in not relevant: consider changing to a set
+// TODO: the order is not relevant: consider changing to a set
 var directions = []*Direction{
 	&Direction{-1, 0}, // up
 	&Direction{0, 1},  // right
