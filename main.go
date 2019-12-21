@@ -1,8 +1,19 @@
 package main
 
+import "fmt"
+
 func main() {
-	p1 := &RandomPlayer{"Aldo"}
-	p2 := &RandomPlayer{"Ugo"}
-	g := NewGame(p1, p2)
-	g.Play()
+	grid := `
+	. . . . . . . .
+	. . . . X . . .
+	. . . O . . . .
+	. . O . . . . .
+	. . . . . X O O
+	. . . . . O . .
+	. . O O X . . .
+	. . . . . . . .`
+	board := mustParseGrid(grid)
+	state := State{board, 'X', 0}
+	fmt.Println(board)
+	fmt.Println(state.Actions())
 }

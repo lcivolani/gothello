@@ -56,14 +56,7 @@ func (s *State) Actions() []Action {
 			if cell != 0 {
 				continue
 			}
-			capt := false
-			for _, dir := range directions {
-				if s.captures(i, j, dir) {
-					capt = true
-					break
-				}
-			}
-			if !capt {
+			if !s.captures(i, j) {
 				continue
 			}
 			acts = append(acts, Action{s.player, i, j})
@@ -72,7 +65,22 @@ func (s *State) Actions() []Action {
 	return acts
 }
 
-func (s *State) captures(x, y int, dir *Direction) bool {
+// captures checks if the current player can capture any opponent pieces by placing
+// a piece in the specified cell
+func (s *State) captures(row, col int) bool {
+	capt := false
+	for _, dir := range directions {
+		if s.capturesAlong(row, col, dir) {
+			capt = true
+			break
+		}
+	}
+	return capt
+}
+
+// captures checks if the current player can capture any opponent pieces along the
+// specified direction by placing a piece in the specified cell
+func (s *State) capturesAlong(x, y int, dir *Direction) bool {
 	nx, ny := dir.Next(x, y)
 	ncell, ok := s.board.Cell(nx, ny)
 	if !ok || ncell != s.Opponent() {
