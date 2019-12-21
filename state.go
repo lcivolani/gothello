@@ -48,34 +48,45 @@ func (s *State) Opponent() rune {
 
 // Actions returns the set of legal moves in a state.
 func (s *State) Actions() []Action {
-	// TODO: possible duplicates!
 	acts := make([]Action, 0)
 	for i := 0; i < size; i++ {
 		for j := 0; j < size; j++ {
 			// this operation cannot fail
 			cell, _ := s.board.Cell(i, j)
-			if cell != s.player {
+			if cell != 0 {
 				continue
 			}
+			capt := false
 			for _, dir := range directions {
-				ni, nj := dir.Next(i, j)
-				ncell, ok := s.board.Cell(ni, nj)
-				if !ok || ncell != s.Opponent() {
-					continue
+				if s.captures(i, j, dir) {
+					capt = true
+					break
 				}
-				// walk over opponent's cells
-				for ok && ncell == s.Opponent() {
-					ni, nj = dir.Next(ni, nj)
-					ncell, ok = s.board.Cell(ni, nj)
-				}
-				if !ok || ncell != 0 {
-					continue
-				}
-				acts = append(acts, Action{s.player, ni, nj})
 			}
+			if !capt {
+				continue
+			}
+			acts = append(acts, Action{s.player, i, j})
 		}
 	}
 	return acts
+}
+
+func (s *State) captures(x, y int, dir *Direction) bool {
+	nx, ny := dir.Next(x, y)
+	ncell, ok := s.board.Cell(nx, ny)
+	if !ok || ncell != s.Opponent() {
+		return false
+	}
+	// walk over opponent's cells
+	for ok && ncell == s.Opponent() {
+		nx, ny = dir.Next(nx, ny)
+		ncell, ok = s.board.Cell(nx, ny)
+	}
+	if !ok || ncell != s.player {
+		return false
+	}
+	return true
 }
 
 func (s *State) Result(a Action) (*State, error) {

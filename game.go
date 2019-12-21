@@ -28,7 +28,7 @@ func (g *Game) Play() {
 
 		nstate, err := g.state.Result(action)
 		if err != nil {
-			fmt.Printf("invalid move from %s: %v\n", player, err)
+			fmt.Printf("%v\n", err)
 			continue
 		}
 		g.state = nstate

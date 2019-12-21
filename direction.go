@@ -1,9 +1,11 @@
 package main
 
+// Direction represents a capture direction when a new piece is set on the board.
 type Direction struct {
 	dx, dy int
 }
 
+// Next returns the coordinates of the next cell along the given direction.
 func (d *Direction) Next(x, y int) (int, int) {
 	return x + d.dx, y + d.dy
 }
