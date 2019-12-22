@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-const size = 8
+const size = 4
 
 type Board struct {
 	matrix [size][size]rune

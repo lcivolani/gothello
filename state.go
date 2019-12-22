@@ -136,14 +136,12 @@ func (s *State) Result(a Action) (*State, error) {
 	if captured == 0 {
 		return s, fmt.Errorf("invalid action %s: no capture", a)
 	}
-	fmt.Println("captured", captured, "pieces")
 	return res, nil
 }
 
 func (s *State) Terminal() bool {
-	// TODO: incorrect: state is terminal if *both* players cannot play
-	return s.board.Count('X')+s.board.Count('O') == size*size ||
-		len(s.Actions()) == 0
+	// TODO: incorrect: state is terminal if **both** players cannot play
+	return s.board.Count('X')+s.board.Count('O') == size*size || len(s.Actions()) == 0
 }
 
 // Utility defines the final numeric value for a game that ends in the terminal
